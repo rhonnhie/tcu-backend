@@ -4,7 +4,7 @@ info:
   version: 1.0.0
 servers:
   - url: http://localhost:3001
-  - url: https://tcu-backend.onrender.com
+  - url: https://taguig-backend.onrender.com
 components:
   securitySchemes:
     noauthAuth:
