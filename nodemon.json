@@ -1,0 +1,12 @@
+{
+  "watch": [
+    "./build/**/*",
+    ".env",
+    "./.env.local",
+    "./.env.development",
+    "./.env.development.local"
+  ],
+  "exec": "dotenv -v NODE_ENV=development -- node .",
+  "ext": "js,json",
+  "delay": 1000
+}

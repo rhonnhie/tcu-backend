@@ -1,0 +1,329 @@
+openapi: 3.0.0
+info:
+  title: TCU-API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001
+  - url: https://tcu-backend.onrender.com
+components:
+  securitySchemes:
+    noauthAuth:
+      type: http
+      scheme: noauth
+    bearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - bearerAuth: []
+tags:
+  - name: user
+  - name: file
+  - name: announcement
+  - name: event
+  - name: assistant
+paths:
+  /user/create:
+    post:
+      tags:
+        - user
+      summary: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                username: admin2
+                password: password2
+                role: ADMIN
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /user/session:
+    get:
+      tags:
+        - user
+      summary: session
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /user/sign-in:
+    post:
+      tags:
+        - user
+      summary: sign-in
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                username: admin1
+                password: password1
+      security:
+        - noauthAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /user/update:
+    patch:
+      tags:
+        - user
+      summary: update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                id: 4a90400c-4463-4275-bd44-c5698d495605
+                password: password2
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /file/upload:
+    post:
+      tags:
+        - file
+      summary: upload
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /file/get/{fileId}/{fileName}:
+    get:
+      tags:
+        - file
+      summary: get
+      security:
+        - noauthAuth: []
+      parameters:
+        - name: fileId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: fileName
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /announcement/get/{announcementId}:
+    get:
+      tags:
+        - announcement
+      summary: get
+      security:
+        - noauthAuth: []
+      parameters:
+        - name: announcementId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /announcement/list:
+    post:
+      tags:
+        - announcement
+      summary: list
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                pin: true
+      security:
+        - noauthAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /announcement/create:
+    post:
+      tags:
+        - announcement
+      summary: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: sample title
+                content: hotdog
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /announcement/update:
+    patch:
+      tags:
+        - announcement
+      summary: update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                id: c0bdf990-1082-4e92-8af1-0d0e983c0eb8
+                pin: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /announcement/delete/{announcementId}:
+    delete:
+      tags:
+        - announcement
+      summary: delete
+      parameters:
+        - name: announcementId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /event/get/{eventId}:
+    get:
+      tags:
+        - event
+      summary: get
+      security:
+        - noauthAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /event/list:
+    post:
+      tags:
+        - event
+      summary: list
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example: {}
+      security:
+        - noauthAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /event/create:
+    post:
+      tags:
+        - event
+      summary: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Birthday
+                content: Someone's birthday
+                date_of_event: '2024-08-22T16:00:00.000Z'
+                attachments: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /event/update:
+    patch:
+      tags:
+        - event
+      summary: update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                id: bd221c64-c27e-4f28-9343-ac833495d25a
+                title: Birthday 👀
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /event/delete/{eventId}:
+    delete:
+      tags:
+        - event
+      summary: delete
+      parameters:
+        - name: eventId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /assistant/ask:
+    post:
+      tags:
+        - assistant
+      summary: ask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                content: What is the school mission?
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

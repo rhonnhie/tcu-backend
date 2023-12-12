@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex", "fullTextSearch"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @unique @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  username String   @unique
+  password String
+  role     UserRole
+
+  announcements Announcement[]
+  files         File[]
+  events        Event[]
+}
+
+enum UserRole {
+  ADMIN
+}
+
+model Announcement {
+  id         String   @id @unique @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  title   String
+  content String  @db.Text
+  pin     Boolean @default(true)
+
+  user        User?  @relation(fields: [user_id], references: [id])
+  photo       File?  @relation("announcement_photo", fields: [photo_id], references: [id])
+  attachments File[] @relation("announcement_attachments")
+
+  user_id  String?
+  photo_id String?
+
+  @@fulltext([title, content])
+}
+
+model Event {
+  id         String   @id @unique @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  title         String
+  content       String   @db.Text
+  date_of_event DateTime
+
+  user        User?  @relation(fields: [user_id], references: [id])
+  photo       File?  @relation("event_photo", fields: [photo_id], references: [id])
+  attachments File[] @relation("event_attachments")
+
+  user_id  String?
+  photo_id String?
+
+  @@fulltext([title, content])
+}
+
+model File {
+  id         String   @id @unique @default(uuid())
+  created_at DateTime @default(now())
+
+  file_id  String? @unique
+  name     String
+  mimetype String
+  size     Int
+
+  user         User?         @relation(fields: [user_id], references: [id])
+  event        Event?        @relation(name: "event_attachments", fields: [event_id], references: [id])
+  announcement Announcement? @relation(name: "announcement_attachments", fields: [announcement_id], references: [id])
+
+  user_id         String?
+  event_id        String?
+  announcement_id String?
+
+  announcement_with_photo Announcement[] @relation("announcement_photo")
+  event_with_photo        Event[]        @relation("event_photo")
+}
