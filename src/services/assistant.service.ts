@@ -87,6 +87,7 @@ export class AssistantService {
             - Until when is the enrollment period for TCU For Freshmen:?: February 12, 2023
             - Until when is the enrollment period for TCU For Balik-Aral:?: January 30, 2023
             - Until when is the enrollment period for TCU For Masteral:?: February 22, 2023
+            list or requirements: voters id, card, form 137
             - When is the schedule of the entrance examination for Freshmen: May 3-5, 2023
             - When is the schedule of the entrance examination for Masterals: May 12-13, 2023
             - When is the schedule of the entrance examination for balik-Aral: May 15, 2023
