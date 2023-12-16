@@ -23,7 +23,7 @@ export class AssistantService {
         process.env.ASSISTANT_API_URL,
         process.env.ASSISTANT_API_KEY,
         process.env.ASSISTANT_API_MODEL,
-        900,
+        500,
       );
 
       AssistantService.instance = instance;
