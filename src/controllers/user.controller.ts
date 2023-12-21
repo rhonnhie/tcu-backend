@@ -24,7 +24,6 @@ controller
 
   .post(
     '/create',
-    authorizationMiddleware(UserRole.ADMIN),
     validate('BODY', UserCreateDto),
     wrapper(async function (request) {
       const userService = await UserService.getInstance();

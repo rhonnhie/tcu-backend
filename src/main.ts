@@ -38,11 +38,15 @@ async function main(): Promise<void> {
       port === 80 || port === 443
         ? `${protocol}localhost`
         : `${protocol}localhost:${port}`;
-
+        logger.info(
+          'node environment: %s',
+          chalk.magentaBright(nodeEnvironment),
+        );
     logger.info(
       `Server ${chalk.yellow('Serve')} ${chalk.underline('%s')}`,
       url,
     );
+    
   });
 }
 

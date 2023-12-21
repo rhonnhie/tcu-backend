@@ -1,69 +1,47 @@
-import { vendors } from '@jmrl23/express-helper';
-import { AssistantAskDto } from '../dtos/assistant-ask.dto';
-import { AnnouncementService } from './announcement.service';
-import { QuestionService } from './question.service';
-import { EventService } from './event.service';
-
-export class AssistantService {
-  private static instance: AssistantService;
-
-  private constructor(
-    private readonly announcementService: AnnouncementService,
-    private readonly questionService: QuestionService,
-    private readonly eventService: EventService,
-    private readonly apiUrl: string | undefined,
-    private readonly apiKey: string | undefined,
-    private readonly model: string | undefined,
-    private readonly maxTokens: number,
-  ) {}
-
-  public static async getInstance() {
-    if (!AssistantService.instance) {
-      const instance = new AssistantService(
-        await AnnouncementService.getInstance(),
-        await QuestionService.getInstance(),
-        await EventService.getInstance(),
-        process.env.ASSISTANT_API_URL,
-        process.env.ASSISTANT_API_KEY,
-        process.env.ASSISTANT_API_MODEL,
-        500,
-      );
-
-      AssistantService.instance = instance;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AssistantService = void 0;
+const express_helper_1 = require("@jmrl23/express-helper");
+const announcement_service_1 = require("./announcement.service");
+const question_service_1 = require("./question.service");
+const event_service_1 = require("./event.service");
+class AssistantService {
+    constructor(announcementService, questionService, eventService, apiUrl, apiKey, model, maxTokens) {
+        this.announcementService = announcementService;
+        this.questionService = questionService;
+        this.eventService = eventService;
+        this.apiUrl = apiUrl;
+        this.apiKey = apiKey;
+        this.model = model;
+        this.maxTokens = maxTokens;
     }
-
-    return AssistantService.instance;
-  }
-
-  public async ask(assistantAskDto: AssistantAskDto) {
-    const questions = (
-      await this.questionService.list({})
-    ).map(({ question, answer }) => ({ question, answer }));
-
-    const questionString = questions
-    .map(({ question, answer }) => `${question}: ${answer}`)
-    .join('\n');
-
-    const announcements = (
-      await this.announcementService.list({
-        pin: true,
-      })
-    ).map(({ created_at, title, content }) => ({ created_at, title, content }));
-    const events = (
-      await this.eventService.list({
-        take: 15,
-      })
-    ).map(({ created_at, title, content, date_of_event }) => ({
-      created_at,
-      title,
-      content,
-      date_of_event,
-    }));
-
-    const conversation: AiMessage[] = [
-      {
-        role: 'system',
-        content: `
+    static async getInstance() {
+        if (!AssistantService.instance) {
+            const instance = new AssistantService(await announcement_service_1.AnnouncementService.getInstance(), await question_service_1.QuestionService.getInstance(), await event_service_1.EventService.getInstance(), process.env.ASSISTANT_API_URL, process.env.ASSISTANT_API_KEY, process.env.ASSISTANT_API_MODEL, 500);
+            AssistantService.instance = instance;
+        }
+        return AssistantService.instance;
+    }
+    async ask(assistantAskDto) {
+        const questions = (await this.questionService.list({})).map(({ question, answer }) => ({ question, answer }));
+        const questionString = questions
+            .map(({ question, answer }) => `${question}: ${answer}`)
+            .join('\n');
+        const announcements = (await this.announcementService.list({
+            pin: true,
+        })).map(({ created_at, title, content }) => ({ created_at, title, content }));
+        const events = (await this.eventService.list({
+            take: 15,
+        })).map(({ created_at, title, content, date_of_event }) => ({
+            created_at,
+            title,
+            content,
+            date_of_event,
+        }));
+        const conversation = [
+            {
+                role: 'system',
+                content: `
             Act as a school helpdesk. 
             Your name is E-TCU. 
             Your goal is to provide school informations, announcements, and events. You are not capable in answering other than that. 
@@ -116,74 +94,57 @@ export class AssistantService {
             - events: ${JSON.stringify(events)}
             ${questionString}
           `,
-      },
-    ];
-
-    conversation.push({
-      role: 'user',
-      content: assistantAskDto.content,
-    });
-
-    const answer = await this.makeApiRequest(conversation);
-
-    conversation.push(
-      {
-        role: 'assistant',
-        content: answer,
-      },
-      {
-        role: 'user',
-        content:
-          'Generate a JSON array that contains 3 question suggestions that can be asked based on your previous response, follow this format: [string, string, string]',
-      },
-    );
-
-    const suggestions = this.parseSuggestions(
-      await this.makeApiRequest(conversation),
-    );
-
-    return {
-      answer,
-      suggestions,
-    };
-  }
-
-  private async makeApiRequest(messages: AiMessage[]) {
-    const response = await fetch(`${this.apiUrl}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: this.model,
-        max_tokens: this.maxTokens,
-        messages,
-      }),
-    });
-
-    const jsonResponse = await response.json();
-
-    if ('error' in jsonResponse) {
-      throw vendors.httpErrors.InternalServerError(jsonResponse.error.message);
+            },
+        ];
+        conversation.push({
+            role: 'user',
+            content: assistantAskDto.content,
+        });
+        const answer = await this.makeApiRequest(conversation);
+        conversation.push({
+            role: 'assistant',
+            content: answer,
+        }, {
+            role: 'user',
+            content: 'Generate a JSON array that contains 3 question suggestions that can be asked based on your previous response, follow this format: [string, string, string]',
+        });
+        const suggestions = this.parseSuggestions(await this.makeApiRequest(conversation));
+        return {
+            answer,
+            suggestions,
+        };
     }
-
-    const data = jsonResponse.choices[0].message.content;
-
-    return data;
-  }
-
-  private parseSuggestions(suggestions: string) {
-    try {
-      const data = JSON.parse(suggestions);
-
-      if (Array.isArray(data)) {
+    async makeApiRequest(messages) {
+        const response = await fetch(`${this.apiUrl}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.apiKey}`,
+            },
+            body: JSON.stringify({
+                model: this.model,
+                max_tokens: this.maxTokens,
+                messages,
+            }),
+        });
+        const jsonResponse = await response.json();
+        if ('error' in jsonResponse) {
+            throw express_helper_1.vendors.httpErrors.InternalServerError(jsonResponse.error.message);
+        }
+        const data = jsonResponse.choices[0].message.content;
         return data;
-      }
-
-      return [];
-    } catch (error: unknown) {
-      return [];
     }
-  }
+    parseSuggestions(suggestions) {
+        try {
+            const data = JSON.parse(suggestions);
+            if (Array.isArray(data)) {
+                return data;
+            }
+            return [];
+        }
+        catch (error) {
+            return [];
+        }
+    }
 }
+exports.AssistantService = AssistantService;

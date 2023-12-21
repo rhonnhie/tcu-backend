@@ -25,6 +25,16 @@ model User {
   events        Event[]
 }
 
+model Question {
+  id         String   @id @unique @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  question String
+  answer String
+}
+
+
 enum UserRole {
   ADMIN
 }
